@@ -73,11 +73,11 @@ func toAddresses(seed []string) ([]tongo.AccountID, error) {
 	if err != nil {
 		return nil, err
 	}
-	w4, err := wallet.NewWallet(key, wallet.V4R2, 0, nil, nil)
+	w4, err := wallet.NewWallet(key, wallet.V4R2, 0, nil)
 	if err != nil {
 		return nil, err
 	}
-	w3, err := wallet.NewWallet(key, wallet.V3R2, 0, nil, nil)
+	w3, err := wallet.NewWallet(key, wallet.V3R2, 0, nil)
 	if err != nil {
 		return nil, err
 	}
