@@ -61,7 +61,7 @@ func checkSeed(seed []string, client *liteclient.Client) bool {
 		if err != nil {
 			continue
 		}
-		if state.Status == tongo.AccountActive {
+		if state.Status == tongo.AccountActive || state.Status == tongo.AccountUninit {
 			return true
 		}
 	}
