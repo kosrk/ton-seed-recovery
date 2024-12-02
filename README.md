@@ -1,6 +1,6 @@
 # TON seed recovery utility
 
-Utility to recover corrupted seed phrase for TON wallet (V4R2 or V3R2).
+Utility to recover corrupted seed phrase for TON wallet (V5R1, V4R2 or V3R2).
 
 ## Use cases
 * One word lost
