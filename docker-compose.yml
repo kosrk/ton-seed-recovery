@@ -1,0 +1,11 @@
+version: '3'
+services:
+  recovery:
+    container_name: ton-seed-recovery
+    restart: on-failure
+    image: ton-seed-recovery:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SEED: "" # set invalid seed here

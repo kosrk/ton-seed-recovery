@@ -2,60 +2,70 @@ package main
 
 import (
 	"fmt"
-	"github.com/startfellows/tongo/liteclient"
-	"github.com/startfellows/tongo/wallet"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/wallet"
 	"os"
 	"strings"
 )
 
-const SEED = ""
+var SEED = "" // TODO: set invalid seed here or as ENV variable
 
 func main() {
-	client, err := liteclient.NewClientWithDefaultMainnet()
+	if len(SEED) == 0 {
+		SEED = os.Getenv("SEED")
+	}
+	if len(SEED) == 0 {
+		fmt.Printf("Need to set the seed in the code or as ENV variable")
+		os.Exit(1)
+	}
+	client, err := liteapi.NewClientWithDefaultMainnet()
 	if err != nil {
 		panic(err)
 	}
-	seed, err := recoverSeed(SEED, client)
+	seed, addr, err := recoverSeed(SEED, client)
 	if err != nil {
 		fmt.Printf("%v", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Valid seed:\n%s", seed)
+	fmt.Printf("Valid seed: %s\nAddress: %s\n", seed, addr.ToHuman(false, false))
 	os.Exit(0)
 }
 
-func recoverSeed(seedString string, client *liteclient.Client) (string, error) {
+func recoverSeed(seedString string, client *liteapi.Client) (string, *tongo.AccountID, error) {
 	seed := strings.Split(seedString, " ")
 	if len(seed) < 23 || len(seed) > 24 {
-		return "", fmt.Errorf("can not recover")
+		return "", nil, fmt.Errorf("len of seed must be 23 or 24 words")
 	}
 
 	for _, word := range seed {
 		if !contains(word, wallet.WORDLIST) {
-			return "", fmt.Errorf("invalid word: %s", word)
+			return "", nil, fmt.Errorf("invalid word: %s", word)
 		}
 	}
 
 	if len(seed) == 24 {
-		valid := checkSeed(seed, client)
+		valid, addr := checkSeed(seed, client)
 		if valid {
-			fmt.Println("you seed is valid")
-			return seedString, nil
+			fmt.Printf("You seed is valid.\n")
+			return seedString, addr, nil
 		}
 		for i := range seed {
 			seed2 := copySeed(seed)
 			if bruteforce(seed2, i, client) {
-				return strings.Join(seed2, " "), nil
+				_, addr := checkSeed(seed2, client)
+				return strings.Join(seed2, " "), addr, nil
 			}
 		}
-		return "", fmt.Errorf("can not find valid seed")
+		return "", nil, fmt.Errorf("can not find valid seed")
 	}
 
 	for i := 0; i < 24; i++ {
 		seed2 := insertEmpty(seed, i)
 		if bruteforce(seed2, i, client) {
-			return strings.Join(seed2, " "), nil
+			_, addr := checkSeed(seed2, client)
+			return strings.Join(seed2, " "), addr, nil
 		}
 	}
-	return "", fmt.Errorf("can not find valid seed")
+	return "", nil, fmt.Errorf("can not find valid seed")
 }

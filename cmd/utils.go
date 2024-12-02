@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/startfellows/tongo"
-	"github.com/startfellows/tongo/liteclient"
-	"github.com/startfellows/tongo/wallet"
+	"github.com/tonkeeper/tongo"
+	"github.com/tonkeeper/tongo/liteapi"
+	"github.com/tonkeeper/tongo/tlb"
+	"github.com/tonkeeper/tongo/wallet"
 	"strings"
 )
 
@@ -34,10 +35,10 @@ func insertEmpty(seed []string, n int) []string {
 	return seed2
 }
 
-func bruteforce(seed []string, wordNumber int, client *liteclient.Client) bool {
+func bruteforce(seed []string, wordNumber int, client *liteapi.Client) bool {
 	for _, w := range wallet.WORDLIST {
 		seed[wordNumber] = w
-		if checkSeed(seed, client) {
+		if ok, _ := checkSeed(seed, client); ok {
 			return true
 		}
 	}
@@ -46,14 +47,14 @@ func bruteforce(seed []string, wordNumber int, client *liteclient.Client) bool {
 
 var checksCounter = 0
 
-func checkSeed(seed []string, client *liteclient.Client) bool {
+func checkSeed(seed []string, client *liteapi.Client) (bool, *tongo.AccountID) {
 	checksCounter++
 	if checksCounter%1000 == 0 {
 		fmt.Printf("%v interations\n", checksCounter)
 	}
 	addresses, err := toAddresses(seed)
 	if err != nil {
-		return false
+		return false, nil
 	}
 
 	for _, a := range addresses {
@@ -61,11 +62,11 @@ func checkSeed(seed []string, client *liteclient.Client) bool {
 		if err != nil {
 			continue
 		}
-		if state.Status == tongo.AccountActive || state.Status == tongo.AccountUninit {
-			return true
+		if state.Account.Status() == tlb.AccountActive || state.Account.Status() == tlb.AccountUninit {
+			return true, &a
 		}
 	}
-	return false
+	return false, nil
 }
 
 func toAddresses(seed []string) ([]tongo.AccountID, error) {
@@ -73,13 +74,17 @@ func toAddresses(seed []string) ([]tongo.AccountID, error) {
 	if err != nil {
 		return nil, err
 	}
-	w4, err := wallet.NewWallet(key, wallet.V4R2, 0, nil)
+	w4, err := wallet.New(key, wallet.V4R2, nil)
 	if err != nil {
 		return nil, err
 	}
-	w3, err := wallet.NewWallet(key, wallet.V3R2, 0, nil)
+	w3, err := wallet.New(key, wallet.V3R2, nil)
 	if err != nil {
 		return nil, err
 	}
-	return []tongo.AccountID{w3.GetAddress(), w4.GetAddress()}, nil
+	w5, err := wallet.New(key, wallet.V5R1, nil)
+	if err != nil {
+		return nil, err
+	}
+	return []tongo.AccountID{w5.GetAddress(), w4.GetAddress(), w3.GetAddress()}, nil
 }

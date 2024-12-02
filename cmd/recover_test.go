@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/startfellows/tongo/liteclient"
+	"github.com/tonkeeper/tongo/liteapi"
 	"strings"
 	"testing"
 )
@@ -15,11 +15,11 @@ const (
 
 func TestRecoverSeed23Words(t *testing.T) {
 	checksCounter = 0
-	client, err := liteclient.NewClientWithDefaultTestnet()
+	client, err := liteapi.NewClientWithDefaultTestnet()
 	if err != nil {
 		panic(err)
 	}
-	seed, err := recoverSeed(_SEED23, client)
+	seed, _, err := recoverSeed(_SEED23, client)
 	if err != nil {
 		panic(err)
 	}
@@ -30,11 +30,11 @@ func TestRecoverSeed23Words(t *testing.T) {
 
 func TestRecoverSeed24Words(t *testing.T) {
 	checksCounter = 0
-	client, err := liteclient.NewClientWithDefaultTestnet()
+	client, err := liteapi.NewClientWithDefaultTestnet()
 	if err != nil {
 		panic(err)
 	}
-	seed, err := recoverSeed(_SEED24, client)
+	seed, _, err := recoverSeed(_SEED24, client)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func TestRecoverSeed24Words(t *testing.T) {
 }
 
 func TestRecoverBadWordSeed(t *testing.T) {
-	_, err := recoverSeed(_BADWORDSEED, nil)
+	_, _, err := recoverSeed(_BADWORDSEED, nil)
 	println(err.Error())
 	if !strings.Contains(err.Error(), "invalid word") {
 		panic(err)
