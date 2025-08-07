@@ -8,4 +8,4 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      SEED: "" # set invalid seed here
+      SEED: "write_your_seed_here"
