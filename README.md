@@ -14,7 +14,11 @@ If you have error `invalid word: some_word` it means that word is not from defau
 
 ### RUN via docker
 1. Write seed to `SEED` at `docker-compose.yml` (24 words for seed with invalid word or 23 words for seed with lost word)
-2. Run container `docker compose up`
-3. Wait for an entry like `can not find valid seed` or `Valid seed` to appear in the logs.
-4. Remove container `docker rm -f ton-seed-recovery`
-5. It is not recommended to continue using the restored seed phrase, it is better to create a new wallet.
+   ```env
+    environment:
+      SEED: "write_your_seed_here"
+    ```
+3. Run container `docker compose up`
+4. Wait for an entry like `can not find valid seed` or `Valid seed` to appear in the logs.
+5. Remove container `docker rm -f ton-seed-recovery`
+6. It is not recommended to continue using the restored seed phrase, it is better to create a new wallet.
